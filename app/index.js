@@ -1,4 +1,4 @@
 import './index.scss';
-import demo from './scene';
-
+const THREE = require('three');
+import demo from './demo';
 demo();

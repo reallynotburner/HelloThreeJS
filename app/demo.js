@@ -1,20 +1,21 @@
 const THREE = require('three');
-const cameraHelper = require('cameraHelper');
+import DemoTorus from './DemoTorus';
+
 let state = {
-    initialWidth: 0,
-    initialHeight: 0,
-    initialAspectRatio: 1.0,
+    width: 0,
+    height: 0,
+    aspectRatio: 1.0,
     fullscreen: false
 };
 
 function reducer(action, item) {
     switch (action) {
-        case 'init':
+        case 'update':
             const elem = item;
             state = {
-                initialWidth: elem.innerWidth,
-                initialHeight: elem.innerHeight,
-                initialAspectRatio: elem.innerWidth/elem.innerHeight
+                width: elem.innerWidth,
+                height: elem.innerHeight,
+                aspectRatio: elem.innerWidth/elem.innerHeight
             };
             break;
         default:
@@ -23,48 +24,38 @@ function reducer(action, item) {
 }
 
 function demo () {
-    reducer('init', window);
+    reducer('udpate', window);
 
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera( 75, state.initialAspectRatio, 0.1, 1000 );
+    var camera = new THREE.PerspectiveCamera( 75, state.aspectRatio, 0.1, 1000 );
 
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
-    renderer.domElement.id = "myRenderer";
-
-    var rendererDomElement = document.getElementById('myRenderer');
-    // var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    // var geometry = new THREE.CylinderGeometry( 1, .1, 2, 32  );
-    // var geometry = new THREE.DodecahedronGeometry( 1 );
-    // var geometry = new THREE.CircleBufferGeometry( 1, 32, 0, Math.PI );
-    // RingBufferGeometry: ƒ ( innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength )
-    // var geometry = new THREE.RingBufferGeometry( 1, 1.5, 16, 4, 0, Math.PI );
-    // TorusGeometry: ƒ ( radius, tube, radialSegments, tubularSegments, arc )
-    // var geometry = new THREE.TorusGeometry( 1, .2, 16, 32, Math.PI*2 );
-    var geometry = new THREE.TorusGeometry( 1, .2, 16, 32, Math.PI*2 );
+    var geometry = DemoTorus();
+    var geometry2 = DemoTorus();
 
     var light = new THREE.PointLight(0xFFFFFF);
     light.position.x = 10;
     light.position.y = 10;
     light.position.z = 10;
     
-    // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    var material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
+    var material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
     var cube = new THREE.Mesh( geometry, material );
+
+
     scene.add( cube );
     scene.add( light );
 
     camera.position.z = 5;
 
     function canvasResizeEventHandler(evt) {
-        const { innerWidth, innerHeight } = evt.target;
-        const xScale = innerWidth / state.initialWidth;
-        const yScale = innerHeight / state.initialHeight;
+        reducer('update', window);
         
         renderer.setSize( innerWidth, innerHeight );
-        camera.scale.x = xScale;
-        camera.scale.y = yScale;
+        camera.aspect = state.aspectRatio;
+        camera.updateProjectionMatrix();
+        renderer.setSize(state.width, state.height);
     }
 
 
