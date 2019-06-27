@@ -1,4 +1,4 @@
 import './index.scss';
-const THREE = require('three');
-import demo from './demo';
+import demo from './demoTorus/scene';
+
 demo();
