@@ -1,4 +1,4 @@
-const THREE = require('three');
+import * as THREE from 'three';
 import light from './lights';
 import camera from './camera';
 import object from './objects';
@@ -14,7 +14,7 @@ let state = {
 
 function reducer(action, item) {
     switch (action) {
-        case 'updateWindow':
+        case 'resize':
             const elem = item;
             state = {
                 ...state,
@@ -29,7 +29,7 @@ function reducer(action, item) {
 }
 
 function canvasResizeEventHandler(evt) {
-    reducer('updateWindow', window);
+    reducer('resize', window);
     
     renderer.setSize( innerWidth, innerHeight );
     camera.aspect = state.aspectRatio;
@@ -43,19 +43,28 @@ function canvasClickHandler(evt) {
 }
 
 function demo () {
-    reducer('updateWindow', window);
+    reducer('resize', window);
 
     var scene = new THREE.Scene();
-    renderer = new THREE.WebGLRenderer();  // todo separate concern!
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+    });  // todo separate concern!
     renderer.setSize( window.innerWidth, window.innerHeight );
+
     document.body.appendChild( renderer.domElement );
 
-
-    scene.add( object );
+    if (Array.isArray(object)) {
+        object.forEach((obj) => {
+            scene.add(obj);
+        });
+    } else if (typeof object === 'object') {
+        scene.add( object );
+    }
     scene.add( light );
 
     window.addEventListener('resize', canvasResizeEventHandler);
-    renderer.domElement.onclick = canvasClickHandler;
+    // renderer.domElement.onclick = canvasClickHandler;
 
     var animate = function () {
         requestAnimationFrame( animate );

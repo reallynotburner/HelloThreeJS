@@ -21,6 +21,7 @@ module.exports = {
     compress: true,
     port: 3500,
     hot: true,
+    host: '0.0.0.0' // allow connections on local network
   },
 
   module: {
