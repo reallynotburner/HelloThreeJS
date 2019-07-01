@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import light from './lights';
 import camera from './camera';
-import object from './objects';
+import STLLoader from '../lib/STLLoader';
 
+let globalMesh;
 let renderer;
-
 let state = {
     width: 0,
     height: 0,
@@ -37,45 +37,45 @@ function canvasResizeEventHandler(evt) {
     renderer.setSize(state.width, state.height);
 }
 
-function canvasClickHandler(evt) {
-   !state.fullscreen && evt.target.requestFullscreen();
-   state.fullscreen = !state.fullscreen;
+function myload(source, scene) {
+    return new Promise((resolve, reject) => {
+        var loader = new STLLoader();
+        loader.load( source, function ( geometry ) {
+            let material = new THREE.MeshPhongMaterial({ color: 0x00ff00 }); // todo: textures should have their own place.  Perhaps a core concern
+            var mesh = new THREE.Mesh( geometry, material );
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            globalMesh = mesh;
+            scene.add( mesh );
+            resolve();
+        } );
+    });
 }
 
-function demo () {
+function curtaDemo () {
     reducer('resize', window);
 
     var scene = new THREE.Scene();
+    scene.add(light);
     renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true
+        antialias: true
     });  // todo separate concern!
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     document.body.appendChild( renderer.domElement );
 
-    if (Array.isArray(object)) {
-        object.forEach((obj) => {
-            scene.add(obj);
-        });
-    } else if (typeof object === 'object') {
-        scene.add( object );
-    }
-    scene.add( light );
-
     window.addEventListener('resize', canvasResizeEventHandler);
-    // renderer.domElement.onclick = canvasClickHandler;
 
     var animate = function () {
         requestAnimationFrame( animate );
-
-        object.rotation.x += 0.02;
-        object.rotation.y += 0.02;
-        object.rotation.z += 0.02;
-
+        globalMesh.rotation.y += .01;
         renderer.render( scene, camera );
     };
-    animate();    
+
+    myload('stl/Lower_Housing.stl', scene)
+        .then(animate);
 }
 
-export default demo;
+camera.position.z = 200;
+
+export default curtaDemo;

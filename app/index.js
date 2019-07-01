@@ -1,4 +1,4 @@
 import './index.scss';
-import demo from './demoTorus/scene';
+import curta from './curta/scene';
 
-demo();
+curta();
